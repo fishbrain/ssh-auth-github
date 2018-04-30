@@ -1,0 +1,25 @@
+version: 0.2
+
+env:
+  variables:
+    ECS_SERVICE_NAME: sshtunnel
+
+phases:
+  install:
+    commands:
+      - pip install awscli==1.14.40
+      - curl -fsSL https://raw.githubusercontent.com/fishbrain/aws-codebuild-extras/master/install -o /tmp/aws-install && . /tmp/aws-install
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email)
+  pre_build:
+    commands:
+      - docker build . -t ${IMAGE_REPO_NAME}:${ECS_SERVICE_NAME}
+  post_build:
+    commands:
+      - |
+        if [ $CODEBUILD_BUILD_SUCCEEDING -eq 1 ] && [ "$CODEBUILD_GIT_BRANCH" = master ]; then
+          docker push -t ${IMAGE_REPO_NAME}:${ECS_SERVICE_NAME} && \
+          aws ecs update-service --cluster ${FISHBRAIN_ENVIRONMENT} --service ${ECS_SERVICE_NAME} --force-new-deployment
+          echo "Waiting for deploy to finish"
+          aws ecs wait services-stable --cluster ${FISHBRAIN_ENVIRONMENT} --services ${ECS_SERVICE_NAME}
+        fi
