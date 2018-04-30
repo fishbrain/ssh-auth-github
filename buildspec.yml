@@ -18,7 +18,7 @@ phases:
     commands:
       - |
         if [ $CODEBUILD_BUILD_SUCCEEDING -eq 1 ] && [ "$CODEBUILD_GIT_BRANCH" = master ]; then
-          docker push -t ${IMAGE_REPO_NAME}:${ECS_SERVICE_NAME} && \
+          docker push ${IMAGE_REPO_NAME}:${ECS_SERVICE_NAME} && \
           aws ecs update-service --cluster ${FISHBRAIN_ENVIRONMENT} --service ${ECS_SERVICE_NAME} --force-new-deployment
           echo "Waiting for deploy to finish"
           aws ecs wait services-stable --cluster ${FISHBRAIN_ENVIRONMENT} --services ${ECS_SERVICE_NAME}
