@@ -31,4 +31,4 @@ RUN mkdir -p /run/sshd
 
 EXPOSE 22
 
-CMD ["/bin/sh", "-c", "/usr/bin/chamber export $CHAMBER_SERVICE -f /etc/ssh-auth-github.json && /usr/sbin/sshd -D -e"]
+CMD ["/bin/sh", "-c", "/usr/bin/chamber export $CHAMBER_SERVICE -f json -o /etc/ssh-auth-github.json && /usr/sbin/sshd -D -e"]
